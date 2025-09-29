@@ -26,6 +26,7 @@ public class EstoqueService {
         var stock = stockRepository.getReferenceById(id);
         if (stock.getQuantity() < item.getQuantity()) {
             stringKafkaTemplate.send("stock-topic", "Sem estoque do produto, restam apenas " + stock.getQuantity());
+            return;
         }
         stock.atualizarEstoque(item.getQuantity());
         stockRepository.save(stock);
