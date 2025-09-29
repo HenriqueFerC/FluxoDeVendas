@@ -2,7 +2,7 @@ package br.com.learning.vendasKafka.controller;
 
 import br.com.learning.vendasKafka.domain.Items;
 import br.com.learning.vendasKafka.domain.Vendas;
-import br.com.learning.vendasKafka.dto.CadastrarVendasDto;
+import br.com.learning.vendasKafka.dto.VendasDto.RegisterVendasDto;
 import br.com.learning.vendasKafka.dto.ItemsDto.RegisterItemsDto;
 import br.com.learning.vendasKafka.repository.VendasRepository;
 import jakarta.transaction.Transactional;
@@ -47,7 +47,7 @@ public class VendasController {
 
     @PostMapping("criar")
     @Transactional
-    public ResponseEntity<Void> criarVenda(CadastrarVendasDto vendasDto) {
+    public ResponseEntity<Void> criarVenda(RegisterVendasDto vendasDto) {
         Vendas venda = new Vendas();
         vendasRepository.save(venda);
         return ResponseEntity.ok().build();

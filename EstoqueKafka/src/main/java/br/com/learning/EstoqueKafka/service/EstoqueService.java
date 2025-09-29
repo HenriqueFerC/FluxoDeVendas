@@ -1,18 +1,35 @@
 package br.com.learning.EstoqueKafka.service;
 
 import br.com.learning.EstoqueKafka.domain.Items;
-import br.com.learning.EstoqueKafka.dto.ItemDto.RegisterItemDto;
+import br.com.learning.EstoqueKafka.repository.StockRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.TopicPartition;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EstoqueService {
 
-    @KafkaListener(topicPartitions = @TopicPartition(topic = "sale-topic", partitions = {"0"}), groupId = "estoque-group")
-    public void processarVenda(Items item){
+    @Autowired
+    private StockRepository stockRepository;
 
-        System.out.println("Venda recebida! ID: " + item.getIdEstoque() + " Valor do Item: " + item.getTotalPrice() + " quantidade: " + item.getQuantity());
+    @Autowired
+    private KafkaTemplate<String, String> stringKafkaTemplate;
+
+    @KafkaListener(topicPartitions = @TopicPartition(topic = "sale-topic", partitions = {"0"}), groupId = "estoque-group")
+    @Transactional
+    public void processarVenda(Items item){
+        var id = item.getIdEstoque();
+        var stock = stockRepository.getReferenceById(id);
+        if (stock.getQuantity() < item.getQuantity()) {
+            stringKafkaTemplate.send("stock-topic", "Sem estoque do produto, restam apenas " + stock.getQuantity());
+        }
+        stock.atualizarEstoque(item.getQuantity());
+        stockRepository.save(stock);
+        stringKafkaTemplate.send("stock-topic", "Venda realizada com sucesso!");
     }
 
 }

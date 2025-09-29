@@ -1,5 +1,6 @@
 package br.com.learning.vendasKafka.domain;
 
+import br.com.learning.vendasKafka.dto.VendasDto.RegisterVendasDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +9,6 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,11 +26,16 @@ public class Vendas {
     private Long id;
 
     @Column(name = "TOTAL_PRICE")
-    private Double totalPrice;
+    private double totalPrice;
 
     @CreatedDate
     private LocalDateTime saleDate;
 
-    @Column(name = "IDS_ITEMS")
-    private List<Long> idsItems;
+    @Column(name = "ID_ESTOQUE")
+    private Long idEstoque;
+
+    public Vendas(RegisterVendasDto vendasDto) {
+        totalPrice = vendasDto.totalPrice();
+        idEstoque = vendasDto.idEstoque();
+    }
 }
