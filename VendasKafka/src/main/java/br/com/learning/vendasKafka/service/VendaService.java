@@ -16,24 +16,23 @@ import org.springframework.stereotype.Service;
 public class VendaService {
 
     @Autowired
-    @Qualifier("jsonKafkaTemplate")
-    private KafkaTemplate<Long, Items> jsonKafkaTemplate;
+    @Qualifier("stringKafkaTemplate")
+    private KafkaTemplate<String, String> stringKafkaTemplate;
 
     @Autowired
     private VendasRepository vendasRepository;
 
-    @KafkaListener(topicPartitions = @TopicPartition(topic = "user-topic", partitions = {"0"}), groupId = "vendas-group", containerFactory = "jsonKafkaListenerContainerFactory")
+    @KafkaListener(topicPartitions = @TopicPartition(topic = "stock-topic", partitions = {"0"}), groupId = "vendas-group", containerFactory = "jsonKafkaListenerContainerFactory")
     @Transactional
-    public void realizarVenda(Items item) {
+    public void processarVenda(Items item) {
+        if(item.getQuantity() == 0) {
+            stringKafkaTemplate.send("sale-topic", "Item sem estoque!");
+            return;
+        }
         RegisterVendasDto sale = new RegisterVendasDto(item.getTotalPrice(), item.getIdEstoque());
         Vendas saleFinished = new Vendas(sale);
         vendasRepository.save(saleFinished);
-        jsonKafkaTemplate.send("sale-topic", item);
-    }
-
-    @KafkaListener(topicPartitions = @TopicPartition(topic = "stock-topic", partitions = {"0"}), groupId = "vendas-group", containerFactory = "stringKafkaListenerContainerFactory")
-    public void processarVenda(String mensagem) {
-        System.out.println(mensagem);
+        stringKafkaTemplate.send("sale-topic", "Compra realizada com sucesso!");
     }
 
 }

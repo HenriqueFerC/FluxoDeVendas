@@ -17,20 +17,21 @@ public class EstoqueService {
     private StockRepository stockRepository;
 
     @Autowired
-    private KafkaTemplate<String, String> stringKafkaTemplate;
+    private KafkaTemplate<Long, Items> stringKafkaTemplate;
 
-    @KafkaListener(topicPartitions = @TopicPartition(topic = "sale-topic", partitions = {"0"}), groupId = "estoque-group")
+    @KafkaListener(topicPartitions = @TopicPartition(topic = "user-topic", partitions = {"0"}), groupId = "estoque-group")
     @Transactional
     public void processarVenda(Items item){
         var id = item.getIdEstoque();
         var stock = stockRepository.getReferenceById(id);
         if (stock.getQuantity() < item.getQuantity()) {
-            stringKafkaTemplate.send("stock-topic", "Sem estoque do produto, restam apenas " + stock.getQuantity());
+            item.setQuantity(0);
+            stringKafkaTemplate.send("stock-topic", item);
             return;
         }
         stock.atualizarEstoque(item.getQuantity());
         stockRepository.save(stock);
-        stringKafkaTemplate.send("stock-topic", "Venda realizada com sucesso!");
+        stringKafkaTemplate.send("stock-topic", item);
     }
 
 }
