@@ -23,11 +23,13 @@ public class Items {
 
     private double totalPrice;
 
+    private Long idUser;
 
     public Items(RegisterItemsDto itemsDto){
         idEstoque = itemsDto.idEstoque();
         quantity = itemsDto.quantity();
         unityPrice = itemsDto.unityPrice();
         totalPrice = itemsDto.quantity() * itemsDto.unityPrice();
+        idUser = itemsDto.idUser();
     }
 }

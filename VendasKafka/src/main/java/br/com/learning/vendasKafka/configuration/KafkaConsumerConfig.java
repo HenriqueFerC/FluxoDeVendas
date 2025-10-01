@@ -57,6 +57,17 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
+    public ConsumerFactory<String, Long> longConsumerFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "vendas-group");
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+        configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
+        configProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        return new DefaultKafkaConsumerFactory<>(configProps);
+    }
+
+    @Bean
     public ConcurrentKafkaListenerContainerFactory<Long, Items> jsonKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<Long, Items> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(jsonConsumerFactory());
@@ -67,6 +78,13 @@ public class KafkaConsumerConfig {
     public ConcurrentKafkaListenerContainerFactory<String, String> stringKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(stringConsumerFactory());
+        return factory;
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, Long> longKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, Long> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(longConsumerFactory());
         return factory;
     }
 }

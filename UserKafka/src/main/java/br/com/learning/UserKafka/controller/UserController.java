@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
@@ -28,6 +25,10 @@ public class UserController {
     @Qualifier("jsonKafkaTemplate")
     private KafkaTemplate<Long, Items> jsonKafkaTemplate;
 
+    @Autowired
+    @Qualifier("longKafkaTemplate")
+    private KafkaTemplate<String, Long> longKafkaTemplate;
+
     @PostMapping("register")
     @Transactional
     public ResponseEntity<DetailsUserDto> registerUser(@RequestBody RegisterUserDto userDto, UriComponentsBuilder uriBuilder) {
@@ -40,7 +41,14 @@ public class UserController {
     @PostMapping("buy")
     public ResponseEntity<Void> buyItems(@RequestBody RegisterItemsDto itemsDto) {
         var item = new Items(itemsDto);
-        jsonKafkaTemplate.send("user-topic", item);
+        jsonKafkaTemplate.send("user-topic",0, null, item);
+        return ResponseEntity.ok().build();
+    }
+
+    //ID provisório até ter security, id será puxado por autenticação
+    @GetMapping("historical/{id}")
+    public ResponseEntity<Void> historical(@PathVariable("id") Long id){
+        longKafkaTemplate.send("user-topic", 1, null, id);
         return ResponseEntity.ok().build();
     }
 }

@@ -29,6 +29,7 @@ public class Items {
     @Column(name = "TOTAL_PRICE")
     private double totalPrice;
 
+    private Long idUser;
 
     public Items(RegisterItemDto itemDto){
         idEstoque = itemDto.idEstoque();

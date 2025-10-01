@@ -24,6 +24,7 @@ public class Items {
 
     private double totalPrice;
 
+    private Long idUser;
 
     public Items(RegisterItemsDto itemsDto){
         idEstoque = itemsDto.idEstoque();
